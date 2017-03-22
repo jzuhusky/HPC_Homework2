@@ -12,20 +12,27 @@
 #include <omp.h>
 #endif
 
+
 int main(int argc, char **argv){
 
-	if ( argc < 3 ){
-		printf("Please provide 2 args: N->MeshSize | Num iters before kill\n");
+	if ( argc != 4 ){
+		printf("Please provide 4 Args: Mesh Size, Max Iterations, # Threads\n");
 		exit(0);
 	}
+	#ifdef _OPENMP
+        #pragma omp parllel private(argc, argv) 
+        if ( argc > 3 && omp_get_thread_num() == 0){
+                omp_set_num_threads(atoi(argv[argc-1]));
+                printf("Using %d openMP Threads\n",atoi(argv[argc-1]));
+        }
+        #endif
 
-	int print_flag = 0;
-	if ( argc == 4){ print_flag = atoi(argv[3]);}
+	int print_flag = 1;
 
 	const int N = atoi(argv[1])+2;
-	int steps=0;
+	long int steps=0;
 	int i,j;
-	int max_iter = atoi(argv[2]);
+	long int max_iter = atoi(argv[2]);
 
 	double **unew, **uold, **temp,h;
 
@@ -48,25 +55,47 @@ int main(int argc, char **argv){
 			unew[f][g]=0.0;
 		}
 	}
+	double eps = atof(argv[argc-1]), res,temp2, initRes;
+	long int countNotConv = 1;
 	/* timing */
   	timestamp_type time1, time2;
   	get_timestamp(&time1);
 
 	// DOING JACOBI HERE!!!!
-	while( steps < max_iter ){
+	while( steps < max_iter  ){
 		temp = uold;
 		uold = unew;
 		unew = temp;
-		#pragma omp parallel for private(j) shared(unew,uold) 	
+		countNotConv = 0;
+		res = 0.0; temp2 = 0.0;
+		#pragma omp parallel private(j,temp) shared(eps,unew,uold) reduction(+:countNotConv) reduction(+:res)
+		{
+
+		#pragma omp for
 		for (i=1; i<N-1; i++){
 			for (j=1; j < N-1; j++){
 				unew[i][j] = (uold[i-1][j]+uold[i+1][j] + uold[i][j-1] + uold[i][j+1] + 1.0*h*h)/4.0;	
 			}
 		}
+		#pragma omp for private(j)
+		for(i=1;i<N-1;i++){
+			for(j=1; j<N-1; j++){
+				temp2 = (4*unew[i][j]-unew[i-1][j]-unew[i+1][j] - unew[i][j-1] - unew[i][j+1] - 1.0*h*h);
+				res += temp2*temp2;
+			}
+		}
+		}
+		if ( steps == 0 ){
+			initRes = res;
+		}else{
+			if ( initRes / res > 1000 ){
+				break;
+			}
+		}
 		steps++;	
     	} // end while
   	get_timestamp(&time2);
-
+        printf("%d Iterations & %f residual\n",steps,res/initRes*100.0);
 	
 	if (print_flag !=0 ){
 		FILE *outFile = fopen("jacobi2D.dat", "w" );
@@ -76,7 +105,7 @@ int main(int argc, char **argv){
 			}
 		}
 		int closed = fclose(outFile); 
-		printf("Closed: %d\nSuccessfully wrote Jacobi Result to File: jacobi2D.dat\n",closed);
+	//	printf("Closed: %d\nSuccessfully wrote Jacobi Result to File: jacobi2D.dat\n",closed);
 	}
 
 	double elapsed = timestamp_diff_in_seconds(time1,time2);

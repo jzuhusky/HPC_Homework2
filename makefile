@@ -8,7 +8,7 @@ gsExecutable=Gs2D.run
 EXECS=*.run
 DatOutputs=*.dat
 
-METHODS=gs2D-omp jacobi2D-omp gs2D jacobi2D
+METHODS=gs2D-omp jacobi2D-omp
 
 all:${METHODS}
 
@@ -16,10 +16,6 @@ jacobi2D-omp: jacobi2D-omp.c
 	${CC} ${FLAGS} -o ${jacobiExecutable} ${ompFlag} $^
 gs2D-omp: gs2D-omp.c 
 	${CC} ${FLAGS} -o ${gsExecutable} ${ompFlag} $^
-jacobi2D: jacobi2D-omp.c 
-	${CC} ${FLAGS} -o JacobiSerial.run $^
-gs2D: gs2D-omp.c 
-	${CC} ${FLAGS} -o GSSerial.run  $^
 
 
 clean:
