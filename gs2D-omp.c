@@ -56,22 +56,22 @@ int main(int argc, char **argv){
 		temp = uold;
 		uold = unew;
 		unew = temp;
-//		#pragma omp parallel shared(unew,uold) private(j)
+		#pragma omp parallel shared(unew,uold) private(j)
 		{
-//			#pragma omp for 
+			#pragma omp for 
 			for (i=1; i<N-1; i++){
 				for (j=1; j < N-1; j+=2){
 					unew[i][j] = (uold[i-1][j]+uold[i+1][j] + uold[i][j-1] + uold[i][j+1] + 1.0*h*h)/4.0;
 				}
 			}
-//			#pragma omp barrier 
-//		 	#pragma omp for
+			#pragma omp barrier 
+		 	#pragma omp for
 			for (i=1; i<N-1; i++){
 				for (j=2; j < N-1; j+=2){
 					unew[i][j] = (unew[i-1][j]+unew[i+1][j] + unew[i][j-1] + unew[i][j+1] + 1.0*h*h)/4.0;	
 				}
 			}
-//			#pragma omp barrier 
+			#pragma omp barrier 
 			
 		}
 		steps++;	
