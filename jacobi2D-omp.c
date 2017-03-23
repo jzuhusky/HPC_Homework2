@@ -23,7 +23,7 @@ int main(int argc, char **argv){
         #pragma omp parllel private(argc, argv) 
         if ( argc > 3 && omp_get_thread_num() == 0){
                 omp_set_num_threads(atoi(argv[argc-1]));
-        //        printf("Using %d openMP Threads\n",atoi(argv[argc-1]));
+                printf("Using %d openMP Threads\n",atoi(argv[argc-1]));
         }
         #endif
 
@@ -77,7 +77,7 @@ int main(int argc, char **argv){
 				unew[i][j] = (uold[i-1][j]+uold[i+1][j] + uold[i][j-1] + uold[i][j+1] + 1.0*h*h)/4.0;	
 			}
 		}
-		#pragma omp for private(j)
+		#pragma omp for
 		for(i=1;i<N-1;i++){
 			for(j=1; j<N-1; j++){
 				temp2 = (4*unew[i][j]-unew[i-1][j]-unew[i+1][j] - unew[i][j-1] - unew[i][j+1] - 1.0*h*h);
@@ -95,7 +95,7 @@ int main(int argc, char **argv){
 		steps++;	
     	} // end while
   	get_timestamp(&time2);
-        //printf("%d Iterations & %f residual\n",steps,res/initRes*100.0);
+        printf("%d Iterations & %f percent of initial residual\n",steps,res/initRes*100.0);
 	
 	if (print_flag !=0 ){
 		FILE *outFile = fopen("jacobi2D.dat", "w" );
@@ -109,8 +109,8 @@ int main(int argc, char **argv){
 	}
 
 	double elapsed = timestamp_diff_in_seconds(time1,time2);
-	//printf("Time elapsed is % Seconds\n", elapsed);	
-	printf("%d %d %f\n",N-2,atoi(argv[argc-1]) , elapsed);	
+	printf("Time elapsed is %f Seconds\n", elapsed);	
+	//printf("%d %d %f\n",N-2,atoi(argv[argc-1]) , elapsed);	
 	for (i=0;i<N;i++){
 		free(*(unew+i));
 		free(*(uold+i));
