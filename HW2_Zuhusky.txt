@@ -60,7 +60,9 @@ but before they can proceed from red to black points, all threads must
 finish working on the previous color. If one thread advances to the other color
 while others are still working, race conditions could possible emerge. 
 Thus barriers were implemented to ensure all threads are either working 
-on red or black points within the mesh. 
+on red or black points within the mesh. For this reason, the code actually
+runs a little bit slower than the code for the jacobi method, although would
+converge faster if both codes were compared running until convergence.
 
 Plots for residuals vs iteration were not included 
 as they were pretty much exactly the same as for the 1D case
