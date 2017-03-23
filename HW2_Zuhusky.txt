@@ -1,0 +1,74 @@
+Joe Zuhusky -> HPC HW2 Prof. Stadler
+Spring 2017
+
+Architecture:          x86_64
+CPU op-mode(s):        32-bit, 64-bit
+Byte Order:            Little Endian
+CPU(s):                8
+On-line CPU(s) list:   0-7
+Thread(s) per core:    1
+Core(s) per socket:    4
+Socket(s):             2
+NUMA node(s):          1
+Vendor ID:             GenuineIntel
+CPU family:            6
+Model:                 15
+Model name:            Intel(R) Xeon(R) CPU           L5320  @ 1.86GHz
+Stepping:              7
+CPU MHz:               1866.669
+BogoMIPS:              3723.88
+Virtualization:        VT-x
+L1d cache:             32K
+L1i cache:             32K
+L2 cache:              4096K
+NUMA node0 CPU(s):     0-7
+
+
+/**** HOW TO USE CODE ****/
+
+IM USING gcc48 on energon1.cims.nyu.edu for this assignment
+
+./executable MESH_DIM(N) MAX_ITERATIONS #OMP_THREADS
+
+All code will produce data files while you can easily plot with gnuplot
+For simple, although not the prettiest, plots -> Use command
+"splot 'DATAFILE'" in gnuplot
+
+**Doing Jacobi Method and Gauss-Seidel - 2D
+**Using Mesh Size of 120, with Maximum Iteratios = 2000
+
+See png files for plots of time vs omp Threads
+
+Note that speedup reaches a limit once the number of available cores 
+is reached. Beyond that, speedup is drastically reduced. Probably
+due to excessive and uneccesary overhead from multithreading... 
+
+Time data was recorded using the executables, however output was formatted
+into the form "#cores time" for gnuplot. 
+
+Notes on code:
+
+Jacobi was relatively striaght forward to code: 
+Just parallize the for loops carrying out the work. 
+Overhead could possibly be reduced by parallelizing the 
+while loop as well... This will be done if future for
+performance improvement. 
+
+GS Method:
+A little more tricky. The for loops are parallelized once again, 
+but before they can proceed from red to black points, all threads must
+finish working on the previous color. If one thread advances to the other color
+while others are still working, race conditions could possible emerge. 
+Thus barriers were implemented to ensure all threads are either working 
+on red or black points within the mesh. 
+
+Plots for residuals vs iteration were not included 
+as they were pretty much exactly the same as for the 1D case
+and what others had posted to piazza. 
+
+
+
+
+
+
+
