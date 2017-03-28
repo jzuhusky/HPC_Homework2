@@ -70,17 +70,18 @@ int main(int argc, char **argv){
 			#pragma omp barrier 
 			#pragma omp for 
 			for (i=1; i<N-1; i++){
-				for (j=1; j < N-1; j+=2){
+				for (j=i%2+1; j < N-1; j+=2){
 					unew[i][j] = (uold[i-1][j]+uold[i+1][j] + uold[i][j-1] + uold[i][j+1] + 1.0*h*h)/4.0;
 				}
 			}
 			#pragma omp barrier 
 		 	#pragma omp for
 			for (i=1; i<N-1; i++){
-				for (j=2; j < N-1; j+=2){
+				for (j=i%2; j < N-1; j+=2){
 					unew[i][j] = (unew[i-1][j]+unew[i+1][j] + unew[i][j-1] + unew[i][j+1] + 1.0*h*h)/4.0;	
 				}
 			}
+			// Now calculate Residuals...
 			#pragma omp for private(j)
 	                for(i=1;i<N-1;i++){
                        	 	for(j=1; j<N-1; j++){
